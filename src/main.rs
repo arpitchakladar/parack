@@ -1,5 +1,7 @@
-use md5;
+mod hash;
+
+use hash::{md5};
 
 fn main() {
-	println!("{:x}", md5::compute(b"Hello, world!"));
+	println!("{}", md5("Hello, world!"));
 }
