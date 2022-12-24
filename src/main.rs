@@ -1,7 +1,10 @@
 mod hash;
+mod algorithms;
 
 use hash::{md5};
+use algorithms::{wordlist_search};
 
 fn main() {
-	println!("{}", md5("Hello, world!"));
+	let cracked_password = wordlist_search(md5, "~/.local/share/wordlists/rockyou.txt", "3f13d53e0eddce1f54f9b9d394b6bff0");
+	println!("{:?}", cracked_password);
 }
