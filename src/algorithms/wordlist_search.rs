@@ -7,7 +7,7 @@ use std::io::{
 
 pub fn wordlist_search<F>(hash: F, wordlist_file: &str, password: &str) -> Option<String>
 	where
-		F: FnOnce(&str) -> String + Copy
+		F: Fn(&str) -> String
 {
 	let file = File::open(wordlist_file).unwrap();
 	let reader = BufReader::new(file);
