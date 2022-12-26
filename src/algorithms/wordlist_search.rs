@@ -13,7 +13,7 @@ pub fn wordlist_search<F>(hash: F, wordlist_file: &str, password: &str) -> Optio
 	let reader = BufReader::new(file);
 
 	for l in reader.lines() {
-		if let Ok(ref line) = l {
+		if let Ok(line) = l {
 			let checked_password = line.trim().to_string();
 			let hashed_password = hash(&checked_password);
 			if hashed_password.eq_ignore_ascii_case(password) {
