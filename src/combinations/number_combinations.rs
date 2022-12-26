@@ -1,14 +1,14 @@
 use std::option::Option;
 use super::Combinations;
 
-pub(super) struct NumberCombinations<'a> {
+pub struct NumberCombinations<'a> {
 	number: &'a str,
 	start: usize,
 	end: usize
 }
 
 impl<'a> NumberCombinations<'a> {
-	pub(super) fn new(number: &'a str) -> Self {
+	pub fn new(number: &'a str) -> Self {
 		Self {
 			number,
 			start: 0,

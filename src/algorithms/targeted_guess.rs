@@ -1,12 +1,8 @@
-mod combinations;
-mod combine_combinations;
-mod name_combinations;
-mod number_combinations;
-
-use combinations::Combinations;
-use combine_combinations::CombineCombinations;
-use name_combinations::NameCombinations;
-use number_combinations::NumberCombinations;
+use crate::combinations::{
+	NameCombinations,
+	NumberCombinations,
+	CombineCombinations
+};
 
 use std::option::Option;
 use std::fs;
@@ -27,8 +23,8 @@ pub fn targeted_guess<F>(hash: F, target_information_file: &str, password: &str)
 				NameCombinations::new(&names[0]),
 				NumberCombinations::new(&numbers[0])
 			).add(NameCombinations::new(&names[1]));
-			for passwords in password_combinations {
-				println!("{}", passwords);
+			for password in password_combinations {
+				println!("{}", password);
 			}
 		}
 	}
