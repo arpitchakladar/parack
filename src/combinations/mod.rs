@@ -4,8 +4,8 @@ pub trait Combinations: Iterator<Item = String> {
 
 mod combine_combinations;
 mod name_combinations;
-mod number_combinations;
+mod sequence_combinations;
 
 pub use combine_combinations::CombineCombinations;
 pub use name_combinations::NameCombinations;
-pub use number_combinations::NumberCombinations;
+pub use sequence_combinations::SequenceCombinations;
