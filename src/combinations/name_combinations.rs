@@ -45,4 +45,8 @@ impl Combinations for NameCombinations<'_> {
 		self.count = 0;
 		self.index = 0;
 	}
+
+	fn possibilities(&self) -> usize {
+		self.names.len() * 3
+	}
 }

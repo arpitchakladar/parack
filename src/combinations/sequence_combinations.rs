@@ -52,4 +52,8 @@ impl Combinations for SequenceCombinations<'_> {
 		self.index = 0;
 		self.end = self.sequences[0].len();
 	}
+
+	fn possibilities(&self) -> usize {
+		self.sequences.iter().fold(0, |acc, x| acc + (x.len() * (x.len() + 1))/2)
+	}
 }

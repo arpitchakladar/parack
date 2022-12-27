@@ -1,6 +1,6 @@
-mod hash;
-mod algorithms;
-mod combinations;
+pub mod hash;
+pub mod algorithms;
+pub mod combinations;
 
 use std::{
 	env, path::Path
