@@ -7,7 +7,6 @@ use serde_yaml;
 use crate::commonly_used;
 use crate::hash::HashFunction;
 use crate::combinations::{
-	combine_combinations,
 	Combinations,
 	ArrayCombinations,
 	NameCombinations,
@@ -22,15 +21,62 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 	let names = target_information.get("names").unwrap();
 	let numbers = target_information.get("numbers").unwrap();
 	let symbols = commonly_used::symbols(1);
-	let password_combinations = combine_combinations![
-		NameCombinations::new(&names),
-		ArrayCombinations::new(&symbols),
-		SequenceCombinations::new(&numbers)
+
+	macro_rules! generate_combinations {
+		(numbers) => {
+			{
+				SequenceCombinations::new(&numbers)
+			}
+		};
+		(symbols) => {
+			{
+				ArrayCombinations::new(&symbols)
+			}
+		};
+		(names) => {
+			{
+				NameCombinations::new(&names)
+			}
+		};
+		(numbers-$($x:tt)-*) => {
+			{
+				CombineCombinations::new(SequenceCombinations::new(&numbers), generate_combinations!($($x)-*))
+			}
+		};
+		(symbols-$($x:tt)-*) => {
+			{
+				CombineCombinations::new(ArrayCombinations::new(&symbols), generate_combinations!($($x)-*))
+			}
+		};
+		(names-$($x:tt)-*) => {
+			{
+				CombineCombinations::new(NameCombinations::new(&names), generate_combinations!($($x)-*))
+			}
+		};
+	}
+
+	macro_rules! check_combinations {
+		($($($x:tt)-*),*) => {
+			$(
+				let combinations = generate_combinations!($($x)-*);
+				for p in combinations {
+					if hash(&p).eq_ignore_ascii_case(password) {
+						return Some(p.to_string());
+					}
+				}
+			)*
+		}
+	}
+
+	check_combinations![
+		names,
+		numbers,
+		names-numbers,
+		numbers-names,
+		names-symbols,
+		names-symbols-numbers,
+		names-symbols-names
 	];
-	let possibilities = password_combinations.possibilities();
-//	for password in password_combinations {
-//		println!("{}", hash(&password));
-//	}
-	println!("Total number of possible passwords combinations is {}", possibilities);
+
 	None
 }
