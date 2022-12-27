@@ -1,4 +1,5 @@
 pub mod hash;
+pub mod commonly_used;
 pub mod algorithms;
 pub mod combinations;
 

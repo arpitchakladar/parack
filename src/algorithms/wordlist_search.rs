@@ -5,10 +5,9 @@ use std::io::{
 	BufReader
 };
 
-pub fn wordlist_search<F>(hash: F, wordlist_file: &str, password: &str) -> Option<String>
-	where
-		F: Fn(&str) -> String
-{
+use crate::hash::HashFunction;
+
+pub fn wordlist_search(hash: HashFunction, wordlist_file: &str, password: &str) -> Option<String> {
 	let file = File::open(wordlist_file).unwrap();
 	let reader = BufReader::new(file);
 

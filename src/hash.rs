@@ -7,6 +7,8 @@ use sha2::{
 	Digest
 };
 
+pub type HashFunction = fn(&str) -> String;
+
 pub fn md5(password: &str) -> String {
 	format!("{:x}", compute_md5(password.as_bytes()))
 }
