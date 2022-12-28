@@ -22,11 +22,16 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 	let names = target_information.get("names")?;
 	let numbers = target_information.get("numbers")?;
 	let symbols = commonly_used::symbols();
+	let common_texts = commonly_used::texts();
+	let common_numbers = commonly_used::numbers();
 
+	let mut total_possibilities = 0usize;
 	macro_rules! check_combinations {
 		($($combinations:expr),*) => {
 			$(
-				for p in $combinations {
+				let combinations = $combinations;
+				total_possibilities += combinations.possibilities();
+				for p in combinations {
 					if hash(&p).eq_ignore_ascii_case(password) {
 						return Some(p);
 					}
@@ -35,19 +40,49 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 		};
 	}
 
-	check_combinations!(
+	check_combinations![
 		NameCombinations::new(&names),
+		SequenceCombinations::new(&common_texts),
 		SequenceCombinations::new(&numbers),
+		SequenceCombinations::new(&common_numbers),
 		combine_combinations![
 			NameCombinations::new(&names),
 			SequenceCombinations::new(&numbers)
+		],
+		combine_combinations![
+			NameCombinations::new(&names),
+			SequenceCombinations::new(&common_numbers)
+		],
+		combine_combinations![
+			SequenceCombinations::new(&common_texts),
+			SequenceCombinations::new(&common_numbers)
 		],
 		combine_combinations![
 			SequenceCombinations::new(&numbers),
 			NameCombinations::new(&names)
 		],
 		combine_combinations![
+			SequenceCombinations::new(&common_numbers),
+			NameCombinations::new(&names)
+		],
+		combine_combinations![
+			SequenceCombinations::new(&common_numbers),
+			SequenceCombinations::new(&common_texts)
+		],
+		combine_combinations![
 			NameCombinations::new(&names),
+			ArrayCombinations::new(&symbols)
+		],
+		combine_combinations![
+			SequenceCombinations::new(&common_texts),
+			ArrayCombinations::new(&symbols)
+		],
+		combine_combinations![
+			SequenceCombinations::new(&numbers),
+			ArrayCombinations::new(&symbols)
+		],
+		combine_combinations![
+			SequenceCombinations::new(&common_numbers),
 			ArrayCombinations::new(&symbols)
 		],
 		combine_combinations![
@@ -58,9 +93,9 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 		combine_combinations![
 			NameCombinations::new(&names),
 			ArrayCombinations::new(&symbols),
-			NameCombinations::new(&names)
+			SequenceCombinations::new(&common_numbers)
 		]
-	);
+	];
 
 	None
 }

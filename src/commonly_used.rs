@@ -1,29 +1,32 @@
 pub fn symbols() -> Vec<String> {
 	vec![
 		"@".to_string(),
-		"$".to_string(),
 		"!".to_string(),
+		"$".to_string(),
+		"_".to_string(),
+		".".to_string(),
+		"-".to_string(),
 		"#".to_string(),
-		"%".to_string(),
-		"^".to_string(),
 		"*".to_string(),
 		"-".to_string(),
 		"+".to_string(),
-		"_".to_string()
+		"%".to_string(),
+		"^".to_string()
 	]
 }
 
-pub fn keyboard_text_patterns() -> Vec<String> {
+pub fn texts() -> Vec<String> {
 	vec![
 		"qwertyuiop".to_string(),
 		"asdfghjkl".to_string(),
 		"zxcvbnm".to_string(),
 		"qazwsx".to_string(),
-		"1qaz2wsx".to_string()
+		"1qaz2wsx".to_string(),
+		"abcdefghijklmnopqrstuvwxyz".to_string()
 	]
 }
 
-pub fn keyboard_number_patterns() -> Vec<String> {
+pub fn numbers() -> Vec<String> {
 	vec![
 		"1234567890".to_string(),
 		"0123456789".to_string(),
