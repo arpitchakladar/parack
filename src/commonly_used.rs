@@ -1,32 +1,33 @@
-pub fn symbols(priority: u8) -> Vec<String> {
-	match priority {
-		0 => vec![
-			"@".to_string(),
-			"$".to_string(),
-			"!".to_string(),
-			"#".to_string(),
-			"%".to_string(),
-			"^".to_string(),
-			"*".to_string(),
-			"-".to_string(),
-			"+".to_string(),
-			"_".to_string()
-		],
-		1 => vec![
-			"@".to_string(),
-			"$".to_string(),
-			"!".to_string(),
-			"#".to_string()
-		],
-		2 => vec![
-			"%".to_string(),
-			"^".to_string(),
-			"*".to_string(),
-			"-".to_string(),
-			"+".to_string(),
-			"_".to_string()
-		],
-		// TODO: Add more symbols,
-		_ => Vec::new()
-	}
+pub fn symbols() -> Vec<String> {
+	vec![
+		"@".to_string(),
+		"$".to_string(),
+		"!".to_string(),
+		"#".to_string(),
+		"%".to_string(),
+		"^".to_string(),
+		"*".to_string(),
+		"-".to_string(),
+		"+".to_string(),
+		"_".to_string()
+	]
+}
+
+pub fn keyboard_text_patterns() -> Vec<String> {
+	vec![
+		"qwertyuiop".to_string(),
+		"asdfghjkl".to_string(),
+		"zxcvbnm".to_string(),
+		"qazwsx".to_string(),
+		"1qaz2wsx".to_string()
+	]
+}
+
+pub fn keyboard_number_patterns() -> Vec<String> {
+	vec![
+		"1234567890".to_string(),
+		"0123456789".to_string(),
+		"0987654321".to_string(),
+		"9876543210".to_string()
+	]
 }
