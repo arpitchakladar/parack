@@ -67,11 +67,11 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 			}
 		}
 
-		print!("Testing pattern {} [{} possibilities]", pattern, combinations.possibilities());
+		print!("\x1b[1;32m{} \x1b[0;33m[\x1b[1;33m{} \x1b[0;33mpossibilities]\x1b[m", pattern, combinations.possibilities());
 
 		for p in combinations {
 			if hash(&p).eq_ignore_ascii_case(password) {
-				println!(" [matched]");
+				println!(" \x1b[1;31m[matched]\x1b[m");
 				return Some(p);
 			}
 		}
