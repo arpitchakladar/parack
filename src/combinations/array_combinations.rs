@@ -1,13 +1,15 @@
 use std::option::Option;
+use std::rc::Rc;
+
 use super::Combinations;
 
-pub struct ArrayCombinations<'a> {
-	array: &'a [String],
+pub struct ArrayCombinations {
+	array: Rc<Vec<String>>,
 	index: usize
 }
 
-impl<'a> ArrayCombinations<'a> {
-	pub fn new(array: &'a [String]) -> Self {
+impl ArrayCombinations {
+	pub fn new(array: Rc<Vec<String>>) -> Self {
 		Self {
 			array,
 			index: 0
@@ -15,7 +17,7 @@ impl<'a> ArrayCombinations<'a> {
 	}
 }
 
-impl Iterator for ArrayCombinations<'_> {
+impl Iterator for ArrayCombinations {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -24,7 +26,7 @@ impl Iterator for ArrayCombinations<'_> {
 	}
 }
 
-impl Combinations for ArrayCombinations<'_> {
+impl Combinations for ArrayCombinations {
 	fn reset(&mut self) {
 		self.index = 0;
 	}

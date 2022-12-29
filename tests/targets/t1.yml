@@ -31,3 +31,26 @@ numbers:
   - "2415"
   - "6135"
   - "8618"
+
+# n - names
+# 0 - numbers
+# $ - symbols
+# x - common text patterns (eg: qwerty)
+# y - common number patterns (eg: 12345678)
+patterns:
+  - "n"
+  - "x"
+  - "0"
+  - "y"
+  - "n-0"
+  - "n-y"
+  - "x-y"
+  - "0-n"
+  - "y-n"
+  - "y-x"
+  - "n-$"
+  - "x-$"
+  - "0-$"
+  - "y-$"
+  - "n-$-0"
+  - "n-$-y"

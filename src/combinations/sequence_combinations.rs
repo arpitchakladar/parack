@@ -1,25 +1,27 @@
 use std::option::Option;
+use std::rc::Rc;
+
 use super::Combinations;
 
-pub struct SequenceCombinations<'a> {
-	sequences: &'a [String],
+pub struct SequenceCombinations {
+	sequences: Rc<Vec<String>>,
 	index: usize,
 	start: usize,
 	end: usize
 }
 
-impl<'a> SequenceCombinations<'a> {
-	pub fn new(sequences: &'a [String]) -> Self {
+impl SequenceCombinations {
+	pub fn new(sequences: Rc<Vec<String>>) -> Self {
 		Self {
+			end: sequences[0].len(),
 			sequences,
 			index: 0,
-			start: 0,
-			end: sequences[0].len()
+			start: 0
 		}
 	}
 }
 
-impl Iterator for SequenceCombinations<'_> {
+impl Iterator for SequenceCombinations {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -46,7 +48,7 @@ impl Iterator for SequenceCombinations<'_> {
 	}
 }
 
-impl Combinations for SequenceCombinations<'_> {
+impl Combinations for SequenceCombinations {
 	fn reset(&mut self) {
 		self.start = 0;
 		self.index = 0;

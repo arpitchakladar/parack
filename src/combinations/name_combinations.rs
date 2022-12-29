@@ -1,14 +1,17 @@
 use std::option::Option;
+use std::rc::Rc;
+
 use super::Combinations;
 
-pub struct NameCombinations<'a> {
-	names: &'a [String],
+#[derive(Debug)]
+pub struct NameCombinations {
+	names: Rc<Vec<String>>,
 	count: usize,
 	index: usize
 }
 
-impl<'a> NameCombinations<'a> {
-	pub fn new(names: &'a [String]) -> Self {
+impl NameCombinations {
+	pub fn new(names: Rc<Vec<String>>) -> Self {
 		Self {
 			names,
 			count: 0,
@@ -17,7 +20,7 @@ impl<'a> NameCombinations<'a> {
 	}
 }
 
-impl Iterator for NameCombinations<'_> {
+impl Iterator for NameCombinations {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -40,7 +43,7 @@ impl Iterator for NameCombinations<'_> {
 	}
 }
 
-impl Combinations for NameCombinations<'_> {
+impl Combinations for NameCombinations {
 	fn reset(&mut self) {
 		self.count = 0;
 		self.index = 0;

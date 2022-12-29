@@ -9,7 +9,6 @@ mod name_combinations;
 mod sequence_combinations;
 
 pub use combine_combinations::{
-	combine_combinations,
 	CombineCombinations
 };
 pub use array_combinations::ArrayCombinations;

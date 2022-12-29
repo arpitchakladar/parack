@@ -1,47 +1,57 @@
 use std::option::Option;
+use std::rc::Rc;
+use std::cell::RefCell;
+
+use crate::utils::rc_ref_cell;
+
 use super::Combinations;
 
-#[macro_export]
-macro_rules! combine_combinations {
-	($combinations:expr) => {
-		$combinations
-	};
-	($combinations1:expr, $($combinations:expr),*) => {
-		{
-			CombineCombinations::new($combinations1, combine_combinations!($($combinations),*))
-		}
-	};
-}
-
-pub use combine_combinations;
-
-pub struct CombineCombinations<T1: Combinations, T2: Combinations> {
-	combinations1: T1,
-	combinations2: T2,
+pub struct CombineCombinations {
+	combinations1: Rc<RefCell<dyn Combinations>>,
+	combinations2: Rc<RefCell<dyn Combinations>>,
 	current_combination: String
 }
 
-impl<T1: Combinations, T2: Combinations> CombineCombinations<T1, T2> {
-	pub fn new(mut combinations1: T1, combinations2: T2) -> Self {
+impl CombineCombinations {
+	pub fn new(combinations1: Rc<RefCell<dyn Combinations>>, combinations2: Rc<RefCell<dyn Combinations>>) -> Self {
+		let current_combination = combinations1.borrow_mut().next().unwrap();
 		Self {
-			current_combination: combinations1.next().unwrap(),
 			combinations1,
-			combinations2
+			combinations2,
+			current_combination
 		}
+	}
+
+	pub fn combine(combinations: Vec<Rc<RefCell<dyn Combinations>>>) -> Self {
+		let mut combination = Self::new(
+			combinations[combinations.len() - 2].clone(),
+			combinations[combinations.len() - 1].clone()
+		);
+		for i in (0..(combinations.len() - 2)).rev() {
+			combination = Self::new(
+				combinations[i].clone(),
+				rc_ref_cell!(combination)
+			);
+		}
+		combination
 	}
 }
 
-impl<T1: Combinations, T2: Combinations> Iterator for CombineCombinations<T1, T2> {
+impl Iterator for CombineCombinations {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		match self.combinations2.next() {
+		let mut combinations1 = self.combinations1.borrow_mut();
+		let mut combinations2 = self.combinations2.borrow_mut();
+		match combinations2.next() {
 			Some(ref combination) => Some(self.current_combination.clone() + combination),
 			None => {
-				match self.combinations1.next() {
+				match combinations1.next() {
 					Some(next_combination) => {
-						self.combinations2.reset();
+						combinations2.reset();
 						self.current_combination = next_combination;
+						drop(combinations1);
+						drop(combinations2);
 						self.next()
 					},
 					None => None
@@ -51,14 +61,16 @@ impl<T1: Combinations, T2: Combinations> Iterator for CombineCombinations<T1, T2
 	}
 }
 
-impl<T1: Combinations, T2: Combinations> Combinations for CombineCombinations<T1, T2> {
+impl Combinations for CombineCombinations {
 	fn reset(&mut self) {
-		self.combinations1.reset();
-		self.combinations2.reset();
-		self.current_combination = self.combinations1.next().unwrap();
+		let mut combinations1 = self.combinations1.borrow_mut();
+		let mut combinations2 = self.combinations2.borrow_mut();
+		combinations1.reset();
+		combinations2.reset();
+		self.current_combination = combinations1.next().unwrap();
 	}
 
 	fn possibilities(&self) -> usize {
-		self.combinations1.possibilities() * self.combinations2.possibilities()
+		self.combinations1.borrow().possibilities() * self.combinations2.borrow().possibilities()
 	}
 }

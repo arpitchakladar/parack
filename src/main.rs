@@ -2,6 +2,7 @@ pub mod hash;
 pub mod commonly_used;
 pub mod algorithms;
 pub mod combinations;
+pub mod utils;
 
 use std::{
 	env, path::Path
@@ -19,7 +20,8 @@ fn main() {
 	let target_information_file = target_information_file_path
 		.to_str()
 		.unwrap();
-	if let Some(password) = targeted_guess(md5, target_information_file, "b608d4bd68ff987187a065ac45833550") {
+	let password = md5("Emma&123");
+	if let Some(password) = targeted_guess(md5, target_information_file, &password) {
 		println!("{}", password);
 	}
 }
