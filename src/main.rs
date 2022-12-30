@@ -15,13 +15,20 @@ fn main() {
 		.unwrap()
 		.display()
 		.to_string();
-	let target_information_file_path = Path::new(&current_dir)
-		.join("tests/targets/t1.yml");
-	let target_information_file = target_information_file_path
-		.to_str()
-		.unwrap();
-	let password = md5("Emma&123");
-	if let Some(password) = targeted_guess(md5, target_information_file, &password) {
-		println!("{}", password);
-	}
+
+	targeted_guess(
+		md5,
+		&format!(
+			"{}",
+			Path::new(&current_dir)
+				.join("tests/targets/t1.yml")
+				.display()
+		),
+		&format!(
+			"{}",
+			Path::new(&current_dir)
+				.join("tests/password_lists/p1.txt")
+				.display()
+		)
+	)
 }
