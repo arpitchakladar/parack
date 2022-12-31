@@ -29,13 +29,11 @@ fn generate_password_patterns(target_information_file_path: &str) -> Vec<Box<dyn
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
 
-	let mut patterns: Vec<Box<dyn Combinations>> = Vec::new();
-
-	for pattern in target_information.get("patterns").unwrap() {
+	target_information.get("patterns").unwrap().into_iter().map(|pattern| {
 		let pattern = pattern.trim();
 		let combinations: Box<dyn Combinations>;
 		if pattern.len() > 2 {
-			let get_combination = |i: usize| -> Rc<RefCell<dyn Combinations>> {
+			let get_combination = |i| -> Rc<RefCell<dyn Combinations>> {
 				match pattern.chars().nth(i) {
 					Some('n') => rc_ref_cell!(NameCombinations::new(names.clone())),
 					Some('0') => rc_ref_cell!(SequenceCombinations::new(numbers.clone())),
@@ -72,12 +70,10 @@ fn generate_password_patterns(target_information_file_path: &str) -> Vec<Box<dyn
 				Some('x') => Box::new(SequenceCombinations::new(common_texts.clone())),
 				Some('y') => Box::new(SequenceCombinations::new(common_numbers.clone())),
 				_ => panic!("Invalid character.")
-			}
+			};
 		}
-		patterns.push(combinations);
-	}
-
-	patterns
+		combinations
+	}).collect()
 }
 
 pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file: &str) {
