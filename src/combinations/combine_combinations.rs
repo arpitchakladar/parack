@@ -2,8 +2,6 @@ use std::option::Option;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use crate::utils::rc_ref_cell;
-
 use super::Combinations;
 
 pub struct CombineCombinations {
@@ -20,20 +18,6 @@ impl CombineCombinations {
 			combinations2,
 			current_combination
 		}
-	}
-
-	pub fn combine(combinations: Vec<Rc<RefCell<dyn Combinations>>>) -> Self {
-		let mut combination = Self::new(
-			combinations[combinations.len() - 2].clone(),
-			combinations[combinations.len() - 1].clone()
-		);
-		for i in (0..(combinations.len() - 2)).rev() {
-			combination = Self::new(
-				combinations[i].clone(),
-				rc_ref_cell!(combination)
-			);
-		}
-		combination
 	}
 }
 
