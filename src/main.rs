@@ -9,8 +9,10 @@ use std::{
 };
 use hash::{md5};
 use algorithms::{targeted_guess};
+use std::time::{Instant};
 
 fn main() {
+	let current = Instant::now();
 	let current_dir = env::current_dir()
 		.unwrap()
 		.display()
@@ -30,5 +32,8 @@ fn main() {
 				.join("tests/password_lists/p1.txt")
 				.display()
 		)
-	)
+	);
+		
+	let duration = current.elapsed();
+   println!("Time elapsed is: {:?}", duration);
 }

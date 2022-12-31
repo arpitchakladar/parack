@@ -1,5 +1,3 @@
-use std::option::Option;
-use std::fs;
 use std::fs::File;
 use std::io::{
 	BufRead,
@@ -22,10 +20,9 @@ use crate::combinations::{
 	CombineCombinations
 };
 
-pub fn targeted_guess(hash: HashFunction, target_information_file: &str, password_list_file: &str) {
-	let file = fs::read_to_string(target_information_file).unwrap();
-	let target_information: BTreeMap<String, Vec<String>> = serde_yaml::from_str(&file).unwrap();
-	drop(file);
+pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file: &str) {
+	let target_information_file = File::open(target_information_file_path).unwrap();
+	let target_information: BTreeMap<String, Vec<String>> = serde_yaml::from_reader(target_information_file).unwrap();
 	let patterns = target_information.get("patterns").unwrap();
 	let names = Rc::new(target_information.get("names").unwrap().clone());
 	let numbers = Rc::new(target_information.get("numbers").unwrap().clone());
@@ -51,27 +48,20 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 				let pattern = pattern.trim();
 				let combinations: Box<dyn Combinations>;
 				if pattern.len() > 1 {
+					let get_combination = |i: usize| -> Rc<RefCell<dyn Combinations>> {
+						match pattern.chars().nth(i) {
+							Some('n') => rc_ref_cell!(NameCombinations::new(names.clone())),
+							Some('0') => rc_ref_cell!(SequenceCombinations::new(numbers.clone())),
+							Some('$') => rc_ref_cell!(ArrayCombinations::new(symbols.clone())),
+							Some('x') => rc_ref_cell!(SequenceCombinations::new(common_texts.clone())),
+							Some('y') => rc_ref_cell!(SequenceCombinations::new(common_numbers.clone())),
+							_ => panic!("Invalid character.")
+						}
+					};
 					let mut combine_combinations: Vec<Rc<RefCell<dyn Combinations>>> = Vec::new();
 					let mut i = 0usize;
 					while i < pattern.len() {
-						match pattern.chars().nth(i) {
-							Some('n') => combine_combinations.push(
-								rc_ref_cell!(NameCombinations::new(names.clone()))
-							),
-							Some('0') => combine_combinations.push(
-								rc_ref_cell!(SequenceCombinations::new(numbers.clone()))
-							),
-							Some('$') => combine_combinations.push(
-								rc_ref_cell!(ArrayCombinations::new(symbols.clone()))
-							),
-							Some('x') => combine_combinations.push(
-								rc_ref_cell!(SequenceCombinations::new(common_texts.clone()))
-							),
-							Some('y') => combine_combinations.push(
-								rc_ref_cell!(SequenceCombinations::new(common_numbers.clone()))
-							),
-							_ => panic!("Invalid character.")
-						}
+						combine_combinations.push(get_combination(i));
 						i += 2;
 					}
 					combinations = Box::new(CombineCombinations::combine(combine_combinations));
@@ -98,7 +88,7 @@ pub fn targeted_guess(hash: HashFunction, target_information_file: &str, passwor
 					};
 
 					if password.eq_ignore_ascii_case(&hash(&current_password)) {
-						println!("Found password \x1b[1;32m{}\x1b[m", p);
+						println!("Found password {}", p);
 						done = true;
 						break;
 					}
