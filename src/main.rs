@@ -7,8 +7,8 @@ pub mod utils;
 use std::{
 	env, path::Path
 };
-use hash::{md5};
-use algorithms::{targeted_guess};
+use hash::{sha256};
+use algorithms::{wordlist_search};
 use std::time::{Instant};
 
 fn main() {
@@ -17,23 +17,29 @@ fn main() {
 		.unwrap()
 		.display()
 		.to_string();
-
-	targeted_guess(
-		md5,
+	
+	let wordlist_search_result = wordlist_search(
+		sha256,
 		&format!(
 			"{}",
 			Path::new(&current_dir)
-				.join("tests/targets/t1.yml")
+				.join("tests/wordlists/wl1.txt")
 				.display()
 		),
 		&format!(
 			"{}",
 			Path::new(&current_dir)
-				.join("tests/password_lists/p1.txt")
+				.join("tests/password_lists/pl1.txt")
 				.display()
 		)
 	);
-		
-	let duration = current.elapsed();
-   println!("Time elapsed is: {:?}", duration);
+
+	match wordlist_search_result {
+		Ok(passwords) => {
+			println!("Found passwords {:?}", passwords);
+		},
+		Err(message) => println!("{}", message)
+	}
+
+	println!("Time elapsed is: {:?}", current.elapsed());
 }

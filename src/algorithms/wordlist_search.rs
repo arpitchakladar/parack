@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io;
 use std::io::{
 	BufRead,
 	BufReader
@@ -6,33 +7,61 @@ use std::io::{
 
 use crate::hash::HashFunction;
 
-pub fn wordlist_search(hash: HashFunction, wordlist_file: &str, password_list_file: &str) {
-	let wordlist_file = File::open(wordlist_file).unwrap();
-	let wordlist_file_reader = BufReader::new(wordlist_file);
+pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<Vec<String>, String> {
+	let password_list;
+	match File::open(password_list_file_path) {
+		Ok(password_list_file) => {
+			password_list = BufReader::new(password_list_file)
+				.lines()
+				.map(|password| password.unwrap())
+				.collect::<Vec<String>>();
+		},
+		Err(error) => match error.kind() {
+			io::ErrorKind::NotFound => {
+				return Err("Password list file not found.".to_owned());
+			},
+			_ => {
+				return Err("Failed to open password list file.".to_owned());
+			}
+		}
+	}
 
-	let password_list: Vec<String> = BufReader::new(File::open(password_list_file).unwrap())
-		.lines()
-		.map(|password| password.unwrap())
-		.collect();
+	let wordlist_file_reader;
+	match File::open(wordlist_file_path) {
+		Ok(wordlist_file) => {
+			wordlist_file_reader = BufReader::new(wordlist_file);
+		},
+		Err(error) => match error.kind() {
+			io::ErrorKind::NotFound => {
+				return Err("Word list file not found.".to_owned());
+			},
+			_ => {
+				return Err("Failed to open word list file.".to_owned());
+			}
+		}
+	}
+
+	let mut passwords = Vec::new();
 
 	for line in wordlist_file_reader.lines() {
-		if let Ok(line) = line {
+		if let Ok(checked_password) = line {
 			for password in &password_list {
 				let splitted_password: Vec<&str> = password.split(":").collect();
 				let password = splitted_password[0].trim();
-				let p = line.trim();
-				let pass = {
+				let hashed_password = hash(&{
 					if splitted_password.len() > 1 {
-						p.to_string() + splitted_password[1].trim()
+						checked_password.to_owned() + splitted_password[1].trim()
 					} else {
-						p.to_string()
+						checked_password.to_owned()
 					}
-				};
-				if hash(&pass).eq_ignore_ascii_case(password) {
-					println!("Found password \x1b[1;32m{}\x1b[m", p);
+				});
+				if hashed_password.eq_ignore_ascii_case(password) {
+					passwords.push(checked_password.to_owned());
 					break;
 				}
 			}
 		}
 	}
+
+	Ok(passwords)
 }
