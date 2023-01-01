@@ -5,14 +5,12 @@ use std::io::{
 	BufReader
 };
 use std::rc::Rc;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 
 use serde_yaml;
 
 use crate::commonly_used;
 use crate::hash::HashFunction;
-use crate::utils::rc_ref_cell;
 use crate::combinations::{
 	Combinations,
 	ArrayCombinations,
@@ -58,6 +56,17 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
 
+	let get_combination = |c| -> Result<Box<dyn Combinations>, String> {
+		match c {
+			Some('n') => Ok(Box::new(NameCombinations::new(names.clone()))),
+			Some('0') => Ok(Box::new(SequenceCombinations::new(numbers.clone()))),
+			Some('$') => Ok(Box::new(ArrayCombinations::new(symbols.clone()))),
+			Some('x') => Ok(Box::new(SequenceCombinations::new(common_texts.clone()))),
+			Some('y') => Ok(Box::new(SequenceCombinations::new(common_numbers.clone()))),
+			_ => Err("Failed to parse target information file.".to_owned())
+		}
+	};
+
 	if let Some(patterns) = target_information.get("patterns") {
 		let mut pattern_combinations: Vec<Box<dyn Combinations>> = Vec::new();
 
@@ -65,26 +74,17 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 			let pattern = pattern.trim();
 			let combinations: Box<dyn Combinations>;
 			if pattern.len() > 2 {
-				let get_combination = |i| -> Result<Rc<RefCell<dyn Combinations>>, String> {
-					match pattern.chars().nth(i) {
-						Some('n') => Ok(rc_ref_cell!(NameCombinations::new(names.clone()))),
-						Some('0') => Ok(rc_ref_cell!(SequenceCombinations::new(numbers.clone()))),
-						Some('$') => Ok(rc_ref_cell!(ArrayCombinations::new(symbols.clone()))),
-						Some('x') => Ok(rc_ref_cell!(SequenceCombinations::new(common_texts.clone()))),
-						Some('y') => Ok(rc_ref_cell!(SequenceCombinations::new(common_numbers.clone()))),
-						_ => Err("Failed to parse target information file.".to_owned())
-					}
-				};
+				
 				let mut combine_combinations: CombineCombinations = CombineCombinations::new(
-					get_combination(pattern.len() - 3)?,
-					get_combination(pattern.len() - 1)?
+					get_combination(pattern.chars().nth(pattern.len() - 3))?,
+					get_combination(pattern.chars().nth(pattern.len() - 1))?
 				);
 				if pattern.len() > 4 {
 					let mut i = pattern.len() - 5;
 					loop {
 						combine_combinations = CombineCombinations::new(
-							get_combination(i)?,
-							rc_ref_cell!(combine_combinations)
+							get_combination(pattern.chars().nth(i))?,
+							Box::new(combine_combinations)
 						);
 						if i < 2 {
 							break;
@@ -95,14 +95,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 				}
 				combinations = Box::new(combine_combinations);
 			} else {
-				combinations = match pattern.chars().nth(0) {
-					Some('n') => Box::new(NameCombinations::new(names.clone())),
-					Some('0') => Box::new(SequenceCombinations::new(numbers.clone())),
-					Some('$') => Box::new(ArrayCombinations::new(symbols.clone())),
-					Some('x') => Box::new(SequenceCombinations::new(common_texts.clone())),
-					Some('y') => Box::new(SequenceCombinations::new(common_numbers.clone())),
-					_ => return Err("Failed to parse target information file.".to_owned())
-				};
+				combinations = get_combination(pattern.chars().nth(0))?;
 			}
 			pattern_combinations.push(combinations);
 		}
