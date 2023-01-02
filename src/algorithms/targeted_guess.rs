@@ -10,6 +10,11 @@ use std::collections::BTreeMap;
 use serde_yaml;
 
 use crate::commonly_used;
+use crate::utils::{
+	try_result,
+	try_option,
+	try_open_file
+};
 use crate::hash::HashFunction;
 use crate::combinations::{
 	Combinations,
@@ -20,38 +25,23 @@ use crate::combinations::{
 };
 
 fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<Box<dyn Combinations>>, String> {
-	let target_information_file;
-	match File::open(target_information_file_path) {
-		Ok(file) => {
-			target_information_file = file;
-		},
-		Err(error) => match error.kind() {
-			io::ErrorKind::NotFound => {
-				return Err("Target information file not found.".to_owned());
-			},
-			_ => {
-				return Err("Failed to open target information file.".to_owned());
-			}
-		}
-	}
-	let target_information: BTreeMap<String, Vec<String>>;
-	if let Ok(data) = serde_yaml::from_reader(target_information_file) {
-		target_information = data;
-	} else {
-		return Err("Failed to parse target information file.".to_owned());
-	}
-	let names;
-	if let Some(data) = target_information.get("names") {
-		names = Rc::new(data.clone());
-	} else {
-		return Err("Names not provided in target information file.".to_owned());
-	}
-	let numbers;
-	if let Some(data) = target_information.get("numbers") {
-		numbers = Rc::new(data.clone());
-	} else {
-		return Err("Numbers not provided in target information file.".to_owned());
-	}
+	let target_information_file = try_open_file!(
+		target_information_file_path,
+		"Target information file not found.",
+		"Failed to open target information file."
+	);
+	let target_information: BTreeMap<String, Vec<String>> = try_result!(
+		serde_yaml::from_reader(target_information_file),
+		"Failed to parse target information file."
+	);
+	let names = Rc::new(try_option!(
+		target_information.get("names"),
+		"Names not provided in target information file."
+	).clone());
+	let numbers = Rc::new(try_option!(
+		target_information.get("numbers"),
+		"Numbers not provided in target information file."
+	).clone());
 	let symbols = Rc::new(commonly_used::symbols());
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
@@ -74,7 +64,6 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 			let pattern = pattern.trim();
 			let combinations: Box<dyn Combinations>;
 			if pattern.len() > 2 {
-				
 				let mut combine_combinations: CombineCombinations = CombineCombinations::new(
 					get_combination(pattern.chars().nth(pattern.len() - 3))?,
 					get_combination(pattern.chars().nth(pattern.len() - 1))?
@@ -109,20 +98,11 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<Vec<String>, String> {
 	let mut patterns = generate_password_patterns(target_information_file_path)?;
 
-	let password_list_file_reader;
-	match File::open(password_list_file_path) {
-		Ok(password_list_file) => {
-			password_list_file_reader = BufReader::new(password_list_file);
-		},
-		Err(error) => match error.kind() {
-			io::ErrorKind::NotFound => {
-				return Err("Password list file not found.".to_owned());
-			},
-			_ => {
-				return Err("Failed to open password list file.".to_owned());
-			}
-		}
-	}
+	let password_list_file_reader = BufReader::new(try_open_file!(
+		password_list_file_path,
+		"Password list file not found.",
+		"Failed to open password list file."
+	));
 
 	let mut passwords = Vec::new();
 	for password in password_list_file_reader.lines() {
@@ -151,7 +131,7 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 					});
 
 					if hashed_password.eq_ignore_ascii_case(password) {
-						passwords.push(current_password);
+						passwords.push(current_password.clone());
 						done = true;
 						break;
 					}

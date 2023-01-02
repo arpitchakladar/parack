@@ -2,6 +2,7 @@ pub mod hash;
 pub mod commonly_used;
 pub mod algorithms;
 pub mod combinations;
+pub mod utils;
 
 use std::{
 	env, path::Path
