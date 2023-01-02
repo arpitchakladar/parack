@@ -5,7 +5,7 @@ use std::io::{
 	BufReader
 };
 use std::rc::Rc;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 
 use serde_yaml;
 
@@ -30,7 +30,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 		"Target information file not found.",
 		"Failed to open target information file."
 	);
-	let target_information: BTreeMap<String, Vec<String>> = try_result!(
+	let target_information: HashMap<String, Vec<String>> = try_result!(
 		serde_yaml::from_reader(target_information_file),
 		"Failed to parse target information file."
 	);
@@ -64,7 +64,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 			let pattern = pattern.trim();
 			let combinations: Box<dyn Combinations>;
 			if pattern.len() > 2 {
-				let mut combine_combinations: CombineCombinations = CombineCombinations::new(
+				let mut combine_combinations = CombineCombinations::new(
 					get_combination(pattern.chars().nth(pattern.len() - 3))?,
 					get_combination(pattern.chars().nth(pattern.len() - 1))?
 				);
