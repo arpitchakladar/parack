@@ -12,7 +12,10 @@ use utils::{
 	parse_args
 };
 use hash::{
+	md2,
+	md4,
 	md5,
+	sha1,
 	sha256,
 	sha512,
 	HashFunction
@@ -27,15 +30,33 @@ fn run_algorithm() -> Result<HashMap<String, String>, String> {
 
 	let hash = {
 		let hash_function = &args[1];
-		if hash_function.eq_ignore_ascii_case("md5") {
-			Ok(md5 as HashFunction)
-		} else if hash_function.eq_ignore_ascii_case("sha256") {
-			Ok(sha256 as HashFunction)
-		} else if hash_function.eq_ignore_ascii_case("sha512") {
-			Ok(sha512 as HashFunction)
-		} else {
-			Err(format!("Hash function \"{}\" not found.", hash_function))
+
+		macro_rules! get_hash_function {
+			($hash:tt) => {
+				if hash_function.eq_ignore_ascii_case(stringify!($hash)) {
+					Ok($hash as HashFunction)
+				} else {
+					Err(format!("Hash function \"{}\" not found.", hash_function))
+				}
+			};
+
+			($hash:tt, $($remaining_hash:tt),*) => {
+				if hash_function.eq_ignore_ascii_case(stringify!($hash)) {
+					Ok($hash as HashFunction)
+				} else {
+					get_hash_function!($($remaining_hash),*)
+				}
+			};
 		}
+
+		get_hash_function![
+			md2,
+			md4,
+			md5,
+			sha1,
+			sha256,
+			sha512
+		]
 	}?;
 
 	let algorithm = &args[2];
