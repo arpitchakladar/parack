@@ -4,12 +4,13 @@ use std::io::{
 	BufRead,
 	BufReader
 };
+use std::collections::HashMap;
 
 use crate::hash::HashFunction;
 use crate::utils::try_open_file;
 
-pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<Vec<String>, String> {
-	let password_list = BufReader::new(try_open_file!(
+pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
+	let mut password_list = BufReader::new(try_open_file!(
 		password_list_file_path,
 		"Password list file not found.",
 		"Failed to open password list file."
@@ -23,9 +24,9 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 			} else {
 				""
 			}.to_owned();
-			(password, salt)
+			(password, salt, true)
 		})
-		.collect::<Vec<(String, String)>>();
+		.collect::<Vec<(String, String, bool)>>();
 
 	let wordlist_file_reader = BufReader::new(try_open_file!(
 		wordlist_file_path,
@@ -33,15 +34,25 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		"Failed to open word list file."
 	));
 
-	let mut passwords = Vec::new();
+	let mut passwords = HashMap::new();
 	for line in wordlist_file_reader.lines() {
 		if let Ok(checked_password) = line {
-			for (password, salt) in &password_list {
-				let hashed_password = hash(&checked_password, salt);
-				if hashed_password.eq_ignore_ascii_case(password) {
-					passwords.push(checked_password);
-					break;
+			let mut no_passwords_left = true;
+
+			for (password, salt, uncracked) in &mut password_list {
+				if *uncracked {
+					no_passwords_left = false;
+					let hashed_password = hash(&checked_password, salt);
+					if hashed_password.eq_ignore_ascii_case(password) {
+						passwords.insert(password.clone(), checked_password);
+						*uncracked = false;
+						break;
+					}
 				}
+			}
+
+			if no_passwords_left {
+				break;
 			}
 		}
 	}

@@ -95,7 +95,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	}
 }
 
-pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<Vec<String>, String> {
+pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
 	let mut patterns = generate_password_patterns(target_information_file_path)?;
 
 	let password_list_file_reader = BufReader::new(try_open_file!(
@@ -104,7 +104,7 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 		"Failed to open password list file."
 	));
 
-	let mut passwords = Vec::new();
+	let mut passwords = HashMap::new();
 	for password in password_list_file_reader.lines() {
 		if let Ok(password) = password {
 			let splitted_password: Vec<&str> = password.split(":").collect();
@@ -125,7 +125,7 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 					let hashed_password = hash(&current_password, salt);
 
 					if hashed_password.eq_ignore_ascii_case(password) {
-						passwords.push(current_password);
+						passwords.insert(password.to_owned(), current_password);
 						done = true;
 						break;
 					}

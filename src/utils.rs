@@ -1,4 +1,3 @@
-use std::env;
 use std::collections::HashMap;
 
 #[macro_export]
@@ -59,15 +58,4 @@ pub fn parse_args<'a>(args: &'a Vec<String>, fields: Vec<(&'a str, &'a str)>) ->
 	}
 
 	Ok(res)
-}
-
-pub fn expand_path(path: &str) -> Result<String, String> {
-	if path.starts_with("~/") {
-		match env::var("HOME") {
-			Ok(home) => Ok(home + &path[2..]),
-			Err(_) => Err(format!("Failed to resolve path \"{}\".", path))
-		}
-	} else {
-		Ok(path.to_owned())
-	}
 }

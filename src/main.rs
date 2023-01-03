@@ -6,10 +6,10 @@ pub mod utils;
 
 use std::env;
 use std::time::{Instant};
+use std::collections::HashMap;
 
 use utils::{
-	parse_args,
-	expand_path
+	parse_args
 };
 use hash::{
 	md5,
@@ -22,7 +22,7 @@ use algorithms::{
 	wordlist_search
 };
 
-fn run_algorithm() -> Result<Vec<String>, String> {
+fn run_algorithm() -> Result<HashMap<String, String>, String> {
 	let args = env::args().collect::<Vec<String>>();
 
 	let hash = {
@@ -50,8 +50,8 @@ fn run_algorithm() -> Result<Vec<String>, String> {
 
 		targeted_guess(
 			hash,
-			&expand_path(args.get("-ti").unwrap())?,
-			&expand_path(args.get("-pl").unwrap())?
+			args.get("-ti").unwrap(),
+			args.get("-pl").unwrap()
 		)
 	} else if algorithm.eq_ignore_ascii_case("wordlist_search") {
 		let args = parse_args(
@@ -64,8 +64,8 @@ fn run_algorithm() -> Result<Vec<String>, String> {
 
 		wordlist_search(
 			hash,
-			&expand_path(args.get("-wl").unwrap())?,
-			&expand_path(args.get("-pl").unwrap())?
+			args.get("-wl").unwrap(),
+			args.get("-pl").unwrap()
 		)
 	} else {
 		Err(format!("Algorithm \"{}\" not found.", algorithm))
