@@ -1,3 +1,6 @@
+use std::env;
+use std::collections::HashMap;
+
 #[macro_export]
 macro_rules! try_result {
 	($x:expr, $error_message:tt) => {
@@ -38,3 +41,33 @@ macro_rules! try_open_file {
 pub use try_result;
 pub use try_option;
 pub use try_open_file;
+
+pub fn parse_args<'a>(args: &'a Vec<String>, fields: Vec<(&'a str, &'a str)>) -> Result<HashMap<&'a str, &'a str>, String> {
+	let mut res: HashMap<&str, &str> = HashMap::with_capacity(fields.len());
+	for i in 0..args.len() {
+		for (command_line_arg, _) in &fields {
+			if args[i].trim().eq_ignore_ascii_case(command_line_arg) {
+				res.insert(command_line_arg, &args[i + 1]);
+			}
+		}
+	}
+
+	for (command_line_arg, error_message) in fields {
+		if !res.contains_key(command_line_arg) {
+			return Err(error_message.to_owned());
+		}
+	}
+
+	Ok(res)
+}
+
+pub fn expand_path(path: &str) -> Result<String, String> {
+	if path.starts_with("~/") {
+		match env::var("HOME") {
+			Ok(home) => Ok(home + &path[2..]),
+			Err(_) => Err(format!("Failed to resolve path \"{}\".", path))
+		}
+	} else {
+		Ok(path.to_owned())
+	}
+}
