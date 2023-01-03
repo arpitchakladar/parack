@@ -2,28 +2,27 @@ use std::fs::File;
 use std::io;
 use std::collections::HashMap;
 
-#[macro_export]
-macro_rules! try_result {
-	($x:expr, $error_message:tt) => {
-		match $x {
+pub trait Resolve<T> {
+	fn resolve(self, error_message: &str) -> Result<T, String>;
+}
+
+impl<T1, T2> Resolve<T1> for Result<T1, T2> {
+	fn resolve(self, error_message: &str) -> Result<T1, String> {
+		match self {
 			Ok(x) => Ok(x),
-			Err(_) => Err($error_message.to_owned())
-		}?
+			Err(_) => Err(error_message.to_owned())
+		}
 	}
 }
 
-#[macro_export]
-macro_rules! try_option {
-	($x:expr, $error_message:tt) => {
-		match $x {
+impl<T> Resolve<T> for Option<T> {
+	fn resolve(self, error_message: &str) -> Result<T, String> {
+		match self {
 			Some(x) => Ok(x),
-			None => Err($error_message.to_owned())
-		}?
+			None => Err(error_message.to_owned())
+		}
 	}
 }
-
-pub use try_result;
-pub use try_option;
 
 pub fn open_file(path: &str, file_not_found_message: &str, failed_to_open_file_message: &str) -> Result<File, String> {
 	match File::open(path) {

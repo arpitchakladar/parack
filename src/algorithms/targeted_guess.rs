@@ -9,8 +9,7 @@ use serde_yaml;
 
 use crate::commonly_used;
 use crate::utils::{
-	try_result,
-	try_option,
+	Resolve,
 	open_file
 };
 use crate::hash::HashFunction;
@@ -28,18 +27,14 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 		"Target information file not found.",
 		"Failed to open target information file."
 	)?;
-	let target_information: HashMap<String, Vec<String>> = try_result!(
-		serde_yaml::from_reader(target_information_file),
-		"Failed to parse target information file."
-	);
-	let names = Rc::new(try_option!(
-		target_information.get("names"),
-		"Names not provided in target information file."
-	).clone());
-	let numbers = Rc::new(try_option!(
-		target_information.get("numbers"),
-		"Numbers not provided in target information file."
-	).clone());
+	let target_information: HashMap<String, Vec<String>> = serde_yaml::from_reader(target_information_file)
+		.resolve("Failed to parse target information file.")?;
+	let names = Rc::new(target_information.get("names")
+		.resolve("Names not provided in target information file.")?
+		.clone());
+	let numbers = Rc::new(target_information.get("numbers")
+		.resolve("Numbers not provided in target information file.")?
+		.clone());
 	let symbols = Rc::new(commonly_used::symbols());
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
