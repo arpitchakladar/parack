@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use crate::hash::HashFunction;
 use crate::utils::open_file;
 
-pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
+pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let mut password_list = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",

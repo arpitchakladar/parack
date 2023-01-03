@@ -25,7 +25,7 @@ use algorithms::{
 	wordlist_search
 };
 
-fn run_algorithm() -> Result<HashMap<String, String>, String> {
+fn run_algorithm() -> Result<HashMap<String, String>, &'static str> {
 	let args = env::args().collect::<Vec<String>>();
 
 	let hash = {
@@ -36,7 +36,7 @@ fn run_algorithm() -> Result<HashMap<String, String>, String> {
 				if hash_function.eq_ignore_ascii_case(stringify!($hash)) {
 					Ok($hash as HashFunction)
 				} else {
-					Err(format!("Hash function \"{}\" not found.", hash_function))
+					Err("Hash function not found.")
 				}
 			};
 
@@ -89,7 +89,7 @@ fn run_algorithm() -> Result<HashMap<String, String>, String> {
 			args.get("-pl").unwrap()
 		)
 	} else {
-		Err(format!("Algorithm \"{}\" not found.", algorithm))
+		Err("Algorithm not found.")
 	}
 }
 

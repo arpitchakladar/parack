@@ -21,7 +21,7 @@ use crate::combinations::{
 	CombineCombinations
 };
 
-fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<Box<dyn Combinations>>, String> {
+fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<Box<dyn Combinations>>, &'static str> {
 	let target_information_file = open_file(
 		target_information_file_path,
 		"Target information file not found.",
@@ -39,14 +39,14 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
 
-	let get_combination = |c| -> Result<Box<dyn Combinations>, String> {
+	let get_combination = |c| -> Result<Box<dyn Combinations>, &'static str> {
 		match c {
 			Some('n') => Ok(Box::new(NameCombinations::new(names.clone()))),
 			Some('0') => Ok(Box::new(SequenceCombinations::new(numbers.clone()))),
 			Some('$') => Ok(Box::new(ArrayCombinations::new(symbols.clone()))),
 			Some('x') => Ok(Box::new(SequenceCombinations::new(common_texts.clone()))),
 			Some('y') => Ok(Box::new(SequenceCombinations::new(common_numbers.clone()))),
-			_ => Err("Failed to parse target information file.".to_owned())
+			_ => Err("Failed to parse target information file.")
 		}
 	};
 
@@ -84,11 +84,11 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 
 		Ok(pattern_combinations)
 	} else {
-		Err("Patterns not provided in target information file.".to_owned())
+		Err("Patterns not provided in target information file.")
 	}
 }
 
-pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
+pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let mut patterns = generate_password_patterns(target_information_file_path)?;
 
 	let password_list_file_reader = BufReader::new(open_file(
