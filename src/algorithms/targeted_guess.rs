@@ -111,9 +111,9 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 			let password = splitted_password[0].trim();
 			let salt = {
 				if splitted_password.len() > 1 {
-					Some(splitted_password[1].trim())
+					splitted_password[1].trim()
 				} else {
-					None
+					""
 				}
 			};
 
@@ -122,16 +122,10 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 
 				combinations.reset();
 				for current_password in combinations {
-					let hashed_password = hash(&{
-						if let Some(salt) = salt {
-							current_password.clone() + salt
-						} else {
-							current_password.clone()
-						}
-					});
+					let hashed_password = hash(&current_password, salt);
 
 					if hashed_password.eq_ignore_ascii_case(password) {
-						passwords.push(current_password.clone());
+						passwords.push(current_password);
 						done = true;
 						break;
 					}

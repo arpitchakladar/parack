@@ -1,32 +1,42 @@
+use digest::{
+	Digest
+};
 use md5::{
-	compute as compute_md5
+	Md5
 };
 use sha2::{
 	Sha256,
-	Sha512,
-	Digest
+	Sha512
 };
 
-pub type HashFunction = fn(&str) -> String;
+pub type HashFunction = fn(&str, &str) -> String;
 
-pub fn md5(password: &str) -> String {
-	format!("{:x}", compute_md5(password.as_bytes()))
-}
-
-pub fn sha256(password: &str) -> String {
+pub fn md5(password: &str, hash: &str) -> String {
 	format!(
 		"{:x}",
-		Sha256::new()
+		Md5::new()
 			.chain_update(password.as_bytes())
+			.chain_update(hash.as_bytes())
 			.finalize()
 	)
 }
 
-pub fn sha512(password: &str) -> String {
+pub fn sha256(password: &str, hash: &str) -> String {
+	format!(
+		"{:x}",
+		Sha256::new()
+			.chain_update(password.as_bytes())
+			.chain_update(hash.as_bytes())
+			.finalize()
+	)
+}
+
+pub fn sha512(password: &str, hash: &str) -> String {
 	format!(
 		"{:x}",
 		Sha512::new()
 			.chain_update(password.as_bytes())
+			.chain_update(hash.as_bytes())
 			.finalize()
 	)
 }

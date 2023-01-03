@@ -14,8 +14,18 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		"Password list file not found.",
 		"Failed to open password list file."
 	)).lines()
-		.map(|password| password.unwrap())
-		.collect::<Vec<String>>();
+		.map(|password| {
+			let password = password.unwrap();
+			let splitted_password = password.split(":").collect::<Vec<&str>>();
+			let password = splitted_password[0].trim().to_owned();
+			let salt = if splitted_password.len() > 1 {
+				splitted_password[1].trim()
+			} else {
+				""
+			}.to_owned();
+			(password, salt)
+		})
+		.collect::<Vec<(String, String)>>();
 
 	let wordlist_file_reader = BufReader::new(try_open_file!(
 		wordlist_file_path,
@@ -26,18 +36,10 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 	let mut passwords = Vec::new();
 	for line in wordlist_file_reader.lines() {
 		if let Ok(checked_password) = line {
-			for password in &password_list {
-				let splitted_password: Vec<&str> = password.split(":").collect();
-				let password = splitted_password[0].trim();
-				let hashed_password = hash(&{
-					if splitted_password.len() > 1 {
-						checked_password.to_owned() + splitted_password[1].trim()
-					} else {
-						checked_password.to_owned()
-					}
-				});
+			for (password, salt) in &password_list {
+				let hashed_password = hash(&checked_password, salt);
 				if hashed_password.eq_ignore_ascii_case(password) {
-					passwords.push(checked_password.to_owned());
+					passwords.push(checked_password);
 					break;
 				}
 			}
