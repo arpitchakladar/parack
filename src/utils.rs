@@ -6,9 +6,8 @@ pub trait Resolve<T> {
 	fn resolve(self, error_message: &'static str) -> Result<T, &'static str>;
 }
 
-impl<T1, T2> Resolve<T1> for Result<T1, T2> {
-	#[inline]
-	fn resolve(self, error_message: &'static str) -> Result<T1, &'static str> {
+impl<T, U> Resolve<T> for Result<T, U> {
+	fn resolve(self, error_message: &'static str) -> Result<T, &'static str> {
 		match self {
 			Ok(x) => Ok(x),
 			Err(_) => Err(error_message)
@@ -17,7 +16,6 @@ impl<T1, T2> Resolve<T1> for Result<T1, T2> {
 }
 
 impl<T> Resolve<T> for Option<T> {
-	#[inline]
 	fn resolve(self, error_message: &'static str) -> Result<T, &'static str> {
 		match self {
 			Some(x) => Ok(x),

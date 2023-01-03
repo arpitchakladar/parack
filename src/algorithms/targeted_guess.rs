@@ -29,12 +29,16 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	)?;
 	let target_information: HashMap<String, Vec<String>> = serde_yaml::from_reader(target_information_file)
 		.resolve("Failed to parse target information file.")?;
-	let names = Rc::new(target_information.get("names")
-		.resolve("Names not provided in target information file.")?
-		.clone());
-	let numbers = Rc::new(target_information.get("numbers")
-		.resolve("Numbers not provided in target information file.")?
-		.clone());
+	let names = Rc::new(
+		target_information.get("names")
+			.resolve("Names not provided in target information file.")?
+			.clone()
+	);
+	let numbers = Rc::new(
+		target_information.get("numbers")
+			.resolve("Numbers not provided in target information file.")?
+			.clone()
+	);
 	let symbols = Rc::new(commonly_used::symbols());
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
@@ -55,30 +59,31 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 
 		for pattern in patterns {
 			let pattern = pattern.trim();
-			let combinations: Box<dyn Combinations>;
-			if pattern.len() > 2 {
-				let mut combine_combinations = CombineCombinations::new(
-					get_combination(pattern.chars().nth(pattern.len() - 3))?,
-					get_combination(pattern.chars().nth(pattern.len() - 1))?
-				);
-				if pattern.len() > 4 {
-					let mut i = pattern.len() - 5;
-					loop {
-						combine_combinations = CombineCombinations::new(
-							get_combination(pattern.chars().nth(i))?,
-							Box::new(combine_combinations)
-						);
-						if i < 2 {
-							break;
-						} else {
-							i -= 2;
+			let combinations = {
+				if pattern.len() > 2 {
+					let mut combine_combinations = CombineCombinations::new(
+						get_combination(pattern.chars().nth(pattern.len() - 3))?,
+						get_combination(pattern.chars().nth(pattern.len() - 1))?
+					);
+					if pattern.len() > 4 {
+						let mut i = pattern.len() - 5;
+						loop {
+							combine_combinations = CombineCombinations::new(
+								get_combination(pattern.chars().nth(i))?,
+								Box::new(combine_combinations)
+							);
+							if i < 2 {
+								break;
+							} else {
+								i -= 2;
+							}
 						}
 					}
+					Box::new(combine_combinations)
+				} else {
+					get_combination(pattern.chars().nth(0))?
 				}
-				combinations = Box::new(combine_combinations);
-			} else {
-				combinations = get_combination(pattern.chars().nth(0))?;
-			}
+			};
 			pattern_combinations.push(combinations);
 		}
 

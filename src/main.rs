@@ -5,12 +5,10 @@ pub mod combinations;
 pub mod utils;
 
 use std::env;
-use std::time::{Instant};
+use std::time::Instant;
 use std::collections::HashMap;
 
-use utils::{
-	parse_args
-};
+use utils::parse_args;
 use hash::{
 	md2,
 	md4,

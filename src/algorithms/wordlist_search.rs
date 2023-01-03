@@ -32,26 +32,25 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		"Failed to open word list file."
 	)?);
 
+	let mut count = 0usize;
 	let mut passwords = HashMap::new();
 	for line in wordlist_file_reader.lines() {
-		if let Ok(checked_password) = line {
-			let mut no_passwords_left = true;
-
-			for (password, salt, uncracked) in &mut password_list {
-				if *uncracked {
-					no_passwords_left = false;
-					let hashed_password = hash(&checked_password, salt);
-					if hashed_password.eq_ignore_ascii_case(password) {
-						passwords.insert(password.clone(), checked_password);
-						*uncracked = false;
-						break;
+		if count < password_list.len() {
+			if let Ok(checked_password) = line {
+				for (password, salt, uncracked) in &mut password_list {
+					if *uncracked {
+						let hashed_password = hash(&checked_password, salt);
+						if hashed_password.eq_ignore_ascii_case(password) {
+							passwords.insert(password.clone(), checked_password);
+							*uncracked = false;
+							count += 1;
+							break;
+						}
 					}
 				}
 			}
-
-			if no_passwords_left {
-				break;
-			}
+		} else {
+			break;
 		}
 	}
 
