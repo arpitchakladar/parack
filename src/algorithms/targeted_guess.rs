@@ -1,5 +1,3 @@
-use std::fs::File;
-use std::io;
 use std::io::{
 	BufRead,
 	BufReader
@@ -13,7 +11,7 @@ use crate::commonly_used;
 use crate::utils::{
 	try_result,
 	try_option,
-	try_open_file
+	open_file
 };
 use crate::hash::HashFunction;
 use crate::combinations::{
@@ -25,11 +23,11 @@ use crate::combinations::{
 };
 
 fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<Box<dyn Combinations>>, String> {
-	let target_information_file = try_open_file!(
+	let target_information_file = open_file(
 		target_information_file_path,
 		"Target information file not found.",
 		"Failed to open target information file."
-	);
+	)?;
 	let target_information: HashMap<String, Vec<String>> = try_result!(
 		serde_yaml::from_reader(target_information_file),
 		"Failed to parse target information file."
@@ -98,11 +96,11 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
 	let mut patterns = generate_password_patterns(target_information_file_path)?;
 
-	let password_list_file_reader = BufReader::new(try_open_file!(
+	let password_list_file_reader = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
 		"Failed to open password list file."
-	));
+	)?);
 
 	let mut passwords = HashMap::new();
 	for password in password_list_file_reader.lines() {

@@ -1,5 +1,3 @@
-use std::fs::File;
-use std::io;
 use std::io::{
 	BufRead,
 	BufReader
@@ -7,14 +5,14 @@ use std::io::{
 use std::collections::HashMap;
 
 use crate::hash::HashFunction;
-use crate::utils::try_open_file;
+use crate::utils::open_file;
 
 pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, String> {
-	let mut password_list = BufReader::new(try_open_file!(
+	let mut password_list = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
 		"Failed to open password list file."
-	)).lines()
+	)?).lines()
 		.map(|password| {
 			let password = password.unwrap();
 			let splitted_password = password.split(":").collect::<Vec<&str>>();
@@ -28,11 +26,11 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		})
 		.collect::<Vec<(String, String, bool)>>();
 
-	let wordlist_file_reader = BufReader::new(try_open_file!(
+	let wordlist_file_reader = BufReader::new(open_file(
 		wordlist_file_path,
 		"Word list file not found.",
 		"Failed to open word list file."
-	));
+	)?);
 
 	let mut passwords = HashMap::new();
 	for line in wordlist_file_reader.lines() {
