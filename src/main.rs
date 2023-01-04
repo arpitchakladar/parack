@@ -20,7 +20,8 @@ use hash::{
 };
 use algorithms::{
 	targeted_guess,
-	wordlist_search
+	wordlist_search,
+	collision_attack
 };
 
 fn run_algorithm() -> Result<HashMap<String, String>, &'static str> {
@@ -84,6 +85,18 @@ fn run_algorithm() -> Result<HashMap<String, String>, &'static str> {
 		wordlist_search(
 			hash,
 			args.get("-wl").unwrap(),
+			args.get("-pl").unwrap()
+		)
+	} else if algorithm.eq_ignore_ascii_case("collision_attack") {
+		let args = parse_args(
+			&args,
+			vec![
+				("-pl", "Password list file not provided.")
+			]
+		)?;
+
+		collision_attack(
+			hash,
 			args.get("-pl").unwrap()
 		)
 	} else {
