@@ -2,6 +2,7 @@ use std::io::{
 	BufRead,
 	BufReader
 };
+use std::str;
 use std::collections::HashMap;
 
 use crate::hash::HashFunction;
@@ -15,7 +16,7 @@ fn create_repeating_string_buffer(length: usize) -> Vec<u8> {
 	buffer
 }
 
-pub fn collision_attack(hash: HashFunction, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
+pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let password_list_file_reader = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
@@ -39,7 +40,7 @@ pub fn collision_attack(hash: HashFunction, password_list_file_path: &str) -> Re
 
 			while !hash(
 				unsafe {
-					std::str::from_utf8_unchecked(&current_password)
+					str::from_utf8_unchecked(&current_password)
 				},
 				salt
 			).eq_ignore_ascii_case(password) {
@@ -66,8 +67,10 @@ pub fn collision_attack(hash: HashFunction, password_list_file_path: &str) -> Re
 				}
 			}
 
-			let current_password = String::from_utf8(current_password).unwrap();
-			passwords.insert(password.to_owned(), current_password);
+			passwords.insert(
+				password.to_owned(),
+				String::from_utf8(current_password).unwrap()
+			);
 		}
 	}
 
