@@ -4,12 +4,12 @@ use std::rc::Rc;
 use super::Combinations;
 
 pub struct ArrayCombinations {
-	array: Rc<Vec<String>>,
+	array: Rc<Vec<Vec<u8>>>,
 	index: usize
 }
 
 impl ArrayCombinations {
-	pub fn new(array: Rc<Vec<String>>) -> Self {
+	pub fn new(array: Rc<Vec<Vec<u8>>>) -> Self {
 		Self {
 			array,
 			index: 0
@@ -18,7 +18,7 @@ impl ArrayCombinations {
 }
 
 impl Iterator for ArrayCombinations {
-	type Item = String;
+	type Item = Vec<u8>;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		self.index += 1;

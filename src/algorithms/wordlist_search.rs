@@ -16,15 +16,15 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		.map(|password| {
 			let password = password.unwrap();
 			let splitted_password = password.split(":").collect::<Vec<&str>>();
-			let password = splitted_password[0].trim().to_owned();
+			let password = hex::decode(splitted_password[0].trim()).unwrap();
 			let salt = if splitted_password.len() > 1 {
 				splitted_password[1].trim()
 			} else {
 				""
-			}.to_owned();
+			}.to_owned().into_bytes();
 			(password, salt, true)
 		})
-		.collect::<Vec<(String, String, bool)>>();
+		.collect::<Vec<(Vec<u8>, Vec<u8>, bool)>>();
 
 	let wordlist_file_reader = BufReader::new(open_file(
 		wordlist_file_path,
@@ -39,9 +39,9 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 			if let Ok(checked_password) = line {
 				for (password, salt, uncracked) in &mut password_list {
 					if *uncracked {
-						let hashed_password = hash(&checked_password, salt);
-						if hashed_password.eq_ignore_ascii_case(password) {
-							passwords.insert(password.clone(), checked_password);
+						let hashed_password = hash(checked_password.as_bytes(), salt);
+						if hashed_password.eq(password) {
+							passwords.insert(hex::encode(password.clone()), checked_password);
 							*uncracked = false;
 							count += 1;
 							break;

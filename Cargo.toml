@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 digest = "0.10.6"
+hex = "0.4.3"
 md2 = "0.10.2"
 md4 = "0.10.2"
 openssl = "0.10.45"

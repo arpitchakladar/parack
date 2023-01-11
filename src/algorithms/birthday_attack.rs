@@ -27,23 +27,22 @@ pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Res
 	for password in password_list_file_reader.lines() {
 		if let Ok(password) = password {
 			let splitted_password: Vec<&str> = password.split(":").collect();
-			let password = splitted_password[0].trim();
+			let password_string = splitted_password[0].trim();
+			let password = hex::decode(password_string).unwrap();
 			let salt = {
 				if splitted_password.len() > 1 {
 					splitted_password[1].trim()
 				} else {
 					""
 				}
-			};
+			}.as_bytes();
 
 			let mut current_password = vec!['!' as u8];
 
 			while !hash(
-				unsafe {
-					str::from_utf8_unchecked(&current_password)
-				},
+				&current_password,
 				salt
-			).eq_ignore_ascii_case(password) {
+			).eq(&password) {
 				let last_index = current_password.len() - 1;
 				if current_password[last_index] != '~' as u8 {
 					current_password[last_index] += 1;
@@ -68,7 +67,7 @@ pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Res
 			}
 
 			passwords.insert(
-				password.to_owned(),
+				password_string.to_owned(),
 				String::from_utf8(current_password).unwrap()
 			);
 		}

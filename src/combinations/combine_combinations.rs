@@ -5,7 +5,7 @@ use super::Combinations;
 pub struct CombineCombinations {
 	combinations1: Box<dyn Combinations>,
 	combinations2: Box<dyn Combinations>,
-	current_combination: String
+	current_combination: Vec<u8>
 }
 
 impl CombineCombinations {
@@ -19,11 +19,15 @@ impl CombineCombinations {
 }
 
 impl Iterator for CombineCombinations {
-	type Item = String;
+	type Item = Vec<u8>;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match self.combinations2.next() {
-			Some(ref combination) => Some(self.current_combination.clone() + combination),
+			Some(ref combination) => {
+				let mut current_combination = self.current_combination.to_owned();
+				current_combination.extend_from_slice(combination);
+				Some(current_combination)
+			},
 			None => {
 				match self.combinations1.next() {
 					Some(next_combination) => {

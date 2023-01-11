@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io;
 use std::collections::HashMap;
-use std::fmt::Write;
 
 pub trait Resolve<T> {
 	fn resolve(self, error_message: &'static str) -> Result<T, &'static str>;

@@ -33,11 +33,19 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 		target_information.get("names")
 			.resolve("Names not provided in target information file.")?
 			.clone()
+			.iter()
+			.cloned()
+			.map(|x| x.into_bytes())
+			.collect::<Vec<Vec<u8>>>()
 	);
 	let numbers = Rc::new(
 		target_information.get("numbers")
 			.resolve("Numbers not provided in target information file.")?
 			.clone()
+			.iter()
+			.cloned()
+			.map(|x| x.into_bytes())
+			.collect::<Vec<Vec<u8>>>()
 	);
 	let symbols = Rc::new(commonly_used::symbols());
 	let common_texts = Rc::new(commonly_used::texts());
@@ -106,14 +114,15 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 	for password in password_list_file_reader.lines() {
 		if let Ok(password) = password {
 			let splitted_password: Vec<&str> = password.split(":").collect();
-			let password = splitted_password[0].trim();
+			let password_string = splitted_password[0].trim();
+			let password = hex::decode(password_string).unwrap();
 			let salt = {
 				if splitted_password.len() > 1 {
 					splitted_password[1].trim()
 				} else {
 					""
 				}
-			};
+			}.as_bytes();
 
 			for combinations in &mut patterns {
 				let mut done = false;
@@ -122,8 +131,8 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 				for current_password in combinations {
 					let hashed_password = hash(&current_password, salt);
 
-					if hashed_password.eq_ignore_ascii_case(password) {
-						passwords.insert(password.to_owned(), current_password);
+					if hashed_password.eq(&password) {
+						passwords.insert(password_string.to_owned(), String::from_utf8(current_password).unwrap());
 						done = true;
 						break;
 					}

@@ -4,14 +4,14 @@ use std::rc::Rc;
 use super::Combinations;
 
 pub struct SequenceCombinations {
-	sequences: Rc<Vec<String>>,
+	sequences: Rc<Vec<Vec<u8>>>,
 	index: usize,
 	start: usize,
 	end: usize
 }
 
 impl SequenceCombinations {
-	pub fn new(sequences: Rc<Vec<String>>) -> Self {
+	pub fn new(sequences: Rc<Vec<Vec<u8>>>) -> Self {
 		Self {
 			end: sequences[0].len(),
 			sequences,
@@ -22,7 +22,7 @@ impl SequenceCombinations {
 }
 
 impl Iterator for SequenceCombinations {
-	type Item = String;
+	type Item = Vec<u8>;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		let sequence = &self.sequences[self.index];
@@ -43,7 +43,7 @@ impl Iterator for SequenceCombinations {
 			}
 		} else {
 			self.end -= 1;
-			Some(sequence[self.start..(self.end + 1)].to_string())
+			Some(sequence[self.start..(self.end + 1)].to_owned())
 		}
 	}
 }

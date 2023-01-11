@@ -1,4 +1,4 @@
-pub trait Combinations: Iterator<Item = String> {
+pub trait Combinations: Iterator<Item = Vec<u8>> {
 	fn reset(&mut self);
 	fn possibilities(&self) -> usize;
 }
