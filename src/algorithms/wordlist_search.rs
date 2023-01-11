@@ -4,27 +4,30 @@ use std::io::{
 };
 use std::collections::HashMap;
 
+use crate::utils::Resolve;
 use crate::hash::HashFunction;
 use crate::utils::open_file;
 
 pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
-	let mut password_list = BufReader::new(open_file(
+	let password_list_string = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
 		"Failed to open password list file."
-	)?).lines()
-		.map(|password| {
-			let password = password.unwrap();
-			let splitted_password = password.split(":").collect::<Vec<&str>>();
-			let password = hex::decode(splitted_password[0].trim()).unwrap();
-			let salt = if splitted_password.len() > 1 {
-				splitted_password[1].trim()
-			} else {
-				""
-			}.to_owned().into_bytes();
-			(password, salt, true)
-		})
-		.collect::<Vec<(Vec<u8>, Vec<u8>, bool)>>();
+	)?).lines();
+
+	let mut password_list = Vec::new();
+	for password in password_list_string {
+		let password = password.unwrap();
+		let splitted_password = password.split(":").collect::<Vec<&str>>();
+		let password = hex::decode(splitted_password[0].trim())
+			.resolve("Hash in password list file is not valid hexadecimal.")?;
+		let salt = if splitted_password.len() > 1 {
+			splitted_password[1].trim()
+		} else {
+			""
+		}.to_owned().into_bytes();
+		password_list.push((password, salt, true))
+	}
 
 	let wordlist_file_reader = BufReader::new(open_file(
 		wordlist_file_path,

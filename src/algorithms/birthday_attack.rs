@@ -5,6 +5,7 @@ use std::io::{
 use std::str;
 use std::collections::HashMap;
 
+use crate::utils::Resolve;
 use crate::hash::HashFunction;
 use crate::utils::open_file;
 
@@ -28,7 +29,8 @@ pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Res
 		if let Ok(password) = password {
 			let splitted_password: Vec<&str> = password.split(":").collect();
 			let password_string = splitted_password[0].trim();
-			let password = hex::decode(password_string).unwrap();
+			let password = hex::decode(password_string)
+				.resolve("Hash in password list file is not valid hexadecimal.")?;
 			let salt = {
 				if splitted_password.len() > 1 {
 					splitted_password[1].trim()
@@ -68,7 +70,9 @@ pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Res
 
 			passwords.insert(
 				password_string.to_owned(),
-				String::from_utf8(current_password).unwrap()
+				unsafe {
+					String::from_utf8_unchecked(current_password)
+				}
 			);
 		}
 	}
