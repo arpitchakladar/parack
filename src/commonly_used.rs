@@ -1,37 +1,37 @@
 pub fn symbols() -> Vec<Vec<u8>> {
 	vec![
-		"@".to_string().into_bytes(),
-		"!".to_string().into_bytes(),
-		"$".to_string().into_bytes(),
-		"_".to_string().into_bytes(),
-		"_".to_string().into_bytes(),
-		".".to_string().into_bytes(),
-		"&".to_string().into_bytes(),
-		"#".to_string().into_bytes(),
-		"*".to_string().into_bytes(),
-		"-".to_string().into_bytes(),
-		"+".to_string().into_bytes(),
-		"%".to_string().into_bytes(),
-		"^".to_string().into_bytes()
+		b"@".to_vec(),
+		b"!".to_vec(),
+		b"$".to_vec(),
+		b"_".to_vec(),
+		b"_".to_vec(),
+		b".".to_vec(),
+		b"&".to_vec(),
+		b"#".to_vec(),
+		b"*".to_vec(),
+		b"-".to_vec(),
+		b"+".to_vec(),
+		b"%".to_vec(),
+		b"^".to_vec()
 	]
 }
 
 pub fn texts() -> Vec<Vec<u8>> {
 	vec![
-		"qwertyuiop".to_string().into_bytes(),
-		"asdfghjkl".to_string().into_bytes(),
-		"zxcvbnm".to_string().into_bytes(),
-		"qazwsx".to_string().into_bytes(),
-		"1qaz2wsx".to_string().into_bytes(),
-		"abcdefghijklmnopqrstuvwxyz".to_string().into_bytes()
+		b"qwertyuiop".to_vec(),
+		b"asdfghjkl".to_vec(),
+		b"zxcvbnm".to_vec(),
+		b"qazwsx".to_vec(),
+		b"1qaz2wsx".to_vec(),
+		b"abcdefghijklmnopqrstuvwxyz".to_vec()
 	]
 }
 
 pub fn numbers() -> Vec<Vec<u8>> {
 	vec![
-		"1234567890".to_string().into_bytes(),
-		"0123456789".to_string().into_bytes(),
-		"0987654321".to_string().into_bytes(),
-		"9876543210".to_string().into_bytes()
+		b"1234567890".to_vec(),
+		b"0123456789".to_vec(),
+		b"0987654321".to_vec(),
+		b"9876543210".to_vec()
 	]
 }

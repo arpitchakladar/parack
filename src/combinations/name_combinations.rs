@@ -1,7 +1,9 @@
 use std::option::Option;
 use std::rc::Rc;
 
-use super::Combinations;
+use crate::combinations::Combinations;
+
+use crate::utils::append_vectors;
 
 #[derive(Debug)]
 pub struct NameCombinations {
@@ -24,11 +26,11 @@ impl NameCombinations {
 fn get_uppercase(bytes: &[u8]) -> Vec<u8> {
 	let mut res = Vec::with_capacity(bytes.len());
 	for byte in bytes {
-		let b = match byte {
-			97..=122 => byte - 32,
-			_ => byte.clone()
+		let result_byte = match *byte as char {
+			'a'..='z' => byte - 32, // 'a' - 32 = 'A'
+			_ => *byte
 		};
-		res.push(b);
+		res.push(result_byte);
 	}
 	res
 }
@@ -41,11 +43,7 @@ impl Iterator for NameCombinations {
 		let name = &self.names[self.index];
 		match self.count {
 			1 => Some(name.to_owned()),
-			2 => {
-				let mut current_name = get_uppercase(&name[0..1]);
-				current_name.extend_from_slice(&name[1usize..]);
-				Some(current_name)
-			},
+			2 => Some(append_vectors![get_uppercase(&name[0..1]), &name[1usize..]]),
 			3 => Some(get_uppercase(&name)),
 			_ => {
 				if self.index < (self.names.len() - 1) {

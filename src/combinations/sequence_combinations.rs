@@ -1,7 +1,7 @@
 use std::option::Option;
 use std::rc::Rc;
 
-use super::Combinations;
+use crate::combinations::Combinations;
 
 pub struct SequenceCombinations {
 	sequences: Rc<Vec<Vec<u8>>>,

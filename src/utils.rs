@@ -56,3 +56,18 @@ pub fn parse_args<'a>(args: &'a Vec<String>, fields: Vec<(&'a str, &'static str)
 
 	Ok(res)
 }
+
+#[macro_export]
+macro_rules! append_vectors {
+	($vec:expr, $($x:expr),*) => {
+		{
+			let mut vec = $vec;
+			$(
+				vec.extend_from_slice($x);
+			)*
+			vec
+		}
+	}
+}
+
+pub use append_vectors;

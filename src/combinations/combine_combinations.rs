@@ -1,6 +1,8 @@
 use std::option::Option;
 
-use super::Combinations;
+use crate::combinations::Combinations;
+
+use crate::utils::append_vectors;
 
 pub struct CombineCombinations {
 	combinations1: Box<dyn Combinations>,
@@ -23,11 +25,7 @@ impl Iterator for CombineCombinations {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match self.combinations2.next() {
-			Some(ref combination) => {
-				let mut current_combination = self.current_combination.to_owned();
-				current_combination.extend_from_slice(combination);
-				Some(current_combination)
-			},
+			Some(ref combination) => Some(append_vectors![self.current_combination.to_owned(), combination]),
 			None => {
 				match self.combinations1.next() {
 					Some(next_combination) => {
