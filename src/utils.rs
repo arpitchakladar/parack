@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io;
 use std::collections::HashMap;
+use std::fmt::Write;
 
 pub trait Resolve<T> {
 	fn resolve(self, error_message: &'static str) -> Result<T, &'static str>;
@@ -55,4 +56,22 @@ pub fn parse_args<'a>(args: &'a Vec<String>, fields: Vec<(&'a str, &'static str)
 	}
 
 	Ok(res)
+}
+
+#[inline]
+fn get_hex_char(byte: u8) -> char {
+	match byte {
+		0..=9 => ('0' as u8 + byte) as char,
+		10..=15 => (87 + byte) as char,
+		_ => 'f'
+	}
+}
+
+pub fn hex_from_bytes(bytes: &[u8]) -> String {
+	let mut hex = String::with_capacity(bytes.len() * 2);
+	for byte in bytes {
+		hex.push(get_hex_char(byte >> 4));
+		hex.push(get_hex_char((byte << 4) >> 4));
+	}
+	hex
 }

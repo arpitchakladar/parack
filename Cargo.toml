@@ -5,9 +5,7 @@ edition = "2021"
 
 [dependencies]
 digest = "0.10.6"
-md-5 = "0.10.5"
 md2 = "0.10.2"
 md4 = "0.10.2"
+openssl = "0.10.45"
 serde_yaml = "0.9.16"
-sha1 = "0.10.5"
-sha2 = "0.10.6"
