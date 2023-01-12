@@ -43,7 +43,7 @@ impl Iterator for NameCombinations {
 		let name = &self.names[self.index];
 		match self.count {
 			1 => Some(name.to_owned()),
-			2 => Some(append_vectors![get_uppercase(&name[0..1]), &name[1usize..]]),
+			2 => Some(append_vectors!(get_uppercase(&name[0..1]), [&name[1..]])),
 			3 => Some(get_uppercase(&name)),
 			_ => {
 				if self.index < (self.names.len() - 1) {
