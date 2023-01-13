@@ -57,25 +57,10 @@ pub fn parse_args<'a>(args: &'a Vec<String>, fields: Vec<(&'a str, &'static str)
 	Ok(res)
 }
 
-#[macro_export]
-macro_rules! append_vectors {
-	($vec:expr, [$($x:expr),+]) => {
-		{
-			let mut vec = $vec;
-			$(vec.extend_from_slice($x);)+
-			vec
-		}
-	};
-
-	($($x:expr),+) => {
-		{
-			let mut length = 0;
-			$(length += $x.len();)+
-			let mut vec = Vec::with_capacity(length);
-			$(vec.extend_from_slice($x);)+
-			vec
-		}
-	};
+pub fn vec_from_slices<T: Clone, const N: usize>(slices: [&[T]; N]) -> Vec<T> {
+	let mut vec = Vec::with_capacity(slices.iter().fold(0, |acc, x| acc + x.len()));
+	for slice in slices {
+		vec.extend_from_slice(slice);
+	}
+	vec
 }
-
-pub use append_vectors;

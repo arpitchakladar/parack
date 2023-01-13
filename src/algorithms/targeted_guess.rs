@@ -27,6 +27,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 		"Target information file not found.",
 		"Failed to open target information file."
 	)?;
+
 	let target_information: HashMap<String, Vec<String>> = serde_yaml::from_reader(target_information_file)
 		.resolve("Failed to parse target information file.")?;
 	let names = Rc::new(
@@ -51,8 +52,8 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	let common_texts = Rc::new(commonly_used::texts());
 	let common_numbers = Rc::new(commonly_used::numbers());
 
-	let get_combination = |c| -> Result<Box<dyn Combinations>, &'static str> {
-		match c {
+	let get_combination = |pattern: &str, i: usize| -> Result<Box<dyn Combinations>, &'static str> {
+		match pattern.chars().nth(i) {
 			Some('n') => Ok(Box::new(NameCombinations::new(names.clone()))),
 			Some('0') => Ok(Box::new(SequenceCombinations::new(numbers.clone()))),
 			Some('$') => Ok(Box::new(ArrayCombinations::new(symbols.clone()))),
@@ -70,14 +71,14 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 			let combinations = {
 				if pattern.len() > 2 {
 					let mut combine_combinations = CombineCombinations::new(
-						get_combination(pattern.chars().nth(pattern.len() - 3))?,
-						get_combination(pattern.chars().nth(pattern.len() - 1))?
+						get_combination(pattern, pattern.len() - 3)?,
+						get_combination(pattern, pattern.len() - 1)?
 					);
 					if pattern.len() > 4 {
 						let mut i = pattern.len() - 5;
 						loop {
 							combine_combinations = CombineCombinations::new(
-								get_combination(pattern.chars().nth(i))?,
+								get_combination(pattern, i)?,
 								Box::new(combine_combinations)
 							);
 							if i < 2 {
@@ -89,7 +90,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 					}
 					Box::new(combine_combinations)
 				} else {
-					get_combination(pattern.chars().nth(0))?
+					get_combination(pattern, 0)?
 				}
 			};
 			pattern_combinations.push(combinations);
@@ -111,11 +112,10 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 	)?);
 
 	let mut passwords = HashMap::new();
-	for password in password_list_file_reader.lines() {
-		if let Ok(password) = password {
-			let splitted_password: Vec<&str> = password.split(":").collect();
-			let password_string = splitted_password[0].trim();
-			let password = hex::decode(password_string)
+	'outer: for password in password_list_file_reader.lines() {
+		if let Ok(original_password) = password {
+			let splitted_password: Vec<&str> = original_password.split(":").collect();
+			let password = hex::decode(splitted_password[0].trim())
 				.resolve("Hash in password list file is not valid hexadecimal.")?;
 			let salt = {
 				if splitted_password.len() > 1 {
@@ -126,23 +126,15 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 			}.as_bytes();
 
 			for combinations in &mut patterns {
-				let mut done = false;
-
 				combinations.reset();
 				for current_password in combinations {
-					let hashed_password = hash(&current_password, salt);
-
-					if hashed_password.eq(&password) {
-						let result_password = String::from_utf8(current_password)
-							.resolve("Failed to parse target information file.")?;
-						passwords.insert(password_string.to_owned(), result_password);
-						done = true;
-						break;
+					if hash(&current_password, salt).eq(&password) {
+						let result_password = unsafe {
+							String::from_utf8_unchecked(current_password)
+						};
+						passwords.insert(original_password, result_password);
+						continue 'outer;
 					}
-				}
-
-				if done {
-					break;
 				}
 			}
 		}

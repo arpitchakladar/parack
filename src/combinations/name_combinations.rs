@@ -1,9 +1,8 @@
 use std::option::Option;
 use std::rc::Rc;
+use std::ops::Range;
 
 use crate::combinations::Combinations;
-
-use crate::utils::append_vectors;
 
 #[derive(Debug)]
 pub struct NameCombinations {
@@ -22,15 +21,19 @@ impl NameCombinations {
 	}
 }
 
-#[inline]
-fn get_uppercase(bytes: &[u8]) -> Vec<u8> {
-	let mut res = Vec::with_capacity(bytes.len());
-	for byte in bytes {
-		let result_byte = match *byte as char {
-			'a'..='z' => byte - 32, // 'a' - 32 = 'A'
+fn get_uppercase(name: &[u8], range: Range<usize>) -> Vec<u8> {
+	let mut res = Vec::with_capacity(name.len());
+	for byte in &name[0..range.start] {
+		res.push(*byte);
+	}
+	for byte in &name[range.clone()] {
+		res.push(match *byte as char {
+			'a'..='z' => *byte - 32, // 'a' - 32 = 'A'
 			_ => *byte
-		};
-		res.push(result_byte);
+		});
+	}
+	for byte in &name[range.end..name.len()] {
+		res.push(*byte);
 	}
 	res
 }
@@ -42,9 +45,9 @@ impl Iterator for NameCombinations {
 		self.count += 1;
 		let name = &self.names[self.index];
 		match self.count {
-			1 => Some(name.to_owned()),
-			2 => Some(append_vectors!(get_uppercase(&name[0..1]), [&name[1..]])),
-			3 => Some(get_uppercase(&name)),
+			1 => Some(name.clone()),
+			2 => Some(get_uppercase(&name, 0..1)),
+			3 => Some(get_uppercase(&name, 0..name.len())),
 			_ => {
 				if self.index < (self.names.len() - 1) {
 					self.index += 1;

@@ -2,7 +2,7 @@ use std::option::Option;
 
 use crate::combinations::Combinations;
 
-use crate::utils::append_vectors;
+use crate::utils::vec_from_slices;
 
 pub struct CombineCombinations {
 	combinations1: Box<dyn Combinations>,
@@ -25,7 +25,7 @@ impl Iterator for CombineCombinations {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		match self.combinations2.next() {
-			Some(ref combination) => Some(append_vectors![&self.current_combination, combination]),
+			Some(ref combination) => Some(vec_from_slices([&self.current_combination, combination])),
 			None => {
 				match self.combinations1.next() {
 					Some(next_combination) => {
