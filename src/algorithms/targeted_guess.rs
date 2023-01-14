@@ -22,14 +22,11 @@ use crate::combinations::{
 };
 
 fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<Box<dyn Combinations>>, &'static str> {
-	let target_information_file = open_file(
+	let target_information: HashMap<String, Vec<String>> = serde_yaml::from_reader(open_file(
 		target_information_file_path,
 		"Target information file not found.",
 		"Failed to open target information file."
-	)?;
-
-	let target_information: HashMap<String, Vec<String>> = serde_yaml::from_reader(target_information_file)
-		.resolve("Failed to parse target information file.")?;
+	)?).resolve("Failed to parse target information file.")?;
 	let names = Rc::new(
 		target_information.get("names")
 			.resolve("Names not provided in target information file.")?

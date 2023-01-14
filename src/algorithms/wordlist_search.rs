@@ -39,30 +39,30 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 
 	let mut count = 0usize;
 	let mut passwords = HashMap::new();
-	for line in wordlist_file_reader.lines() {
-		if count < password_list.len() {
-			if let Ok(checked_password) = line {
-				for (password, salt, uncracked) in &mut password_list {
-					if *uncracked {
-						let hashed_password = hash(checked_password.as_bytes(), salt);
-						if hashed_password.eq(password) {
-							passwords.insert(
-								hex::encode(password)
-									+ ":"
-									+ unsafe {
-										str::from_utf8_unchecked(salt)
-									},
-								checked_password
-							);
-							*uncracked = false;
-							count += 1;
-							break;
+	'outer: for line in wordlist_file_reader.lines() {
+		if let Ok(checked_password) = line {
+			for (password, salt, uncracked) in &mut password_list {
+				if *uncracked {
+					let hashed_password = hash(checked_password.as_bytes(), salt);
+					if hashed_password.eq(password) {
+						passwords.insert(
+							hex::encode(password)
+								+ ":"
+								+ unsafe {
+									str::from_utf8_unchecked(salt)
+								},
+							checked_password
+						);
+						*uncracked = false;
+						count += 1;
+						if count >= password_list.len() {
+							break 'outer;
+						} else {
+							continue 'outer;
 						}
 					}
 				}
 			}
-		} else {
-			break;
 		}
 	}
 
