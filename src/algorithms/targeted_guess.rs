@@ -12,7 +12,7 @@ use crate::utils::{
 	Resolve,
 	open_file
 };
-use crate::hash::HashFunction;
+use crate::hash::CheckHash;
 use crate::combinations::{
 	Combinations,
 	ArrayCombinations,
@@ -99,7 +99,7 @@ fn generate_password_patterns(target_information_file_path: &str) -> Result<Vec<
 	}
 }
 
-pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
+pub fn targeted_guess(hash: CheckHash, target_information_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let mut patterns = generate_password_patterns(target_information_file_path)?;
 
 	let password_list_file_reader = BufReader::new(open_file(
@@ -125,7 +125,7 @@ pub fn targeted_guess(hash: HashFunction, target_information_file_path: &str, pa
 			for combinations in &mut patterns {
 				combinations.reset();
 				for current_password in combinations {
-					if hash(&current_password, salt).eq(&password) {
+					if hash(&current_password, salt, &password) {
 						let result_password = unsafe {
 							String::from_utf8_unchecked(current_password)
 						};

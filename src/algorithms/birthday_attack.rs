@@ -6,7 +6,7 @@ use std::str;
 use std::collections::HashMap;
 
 use crate::utils::Resolve;
-use crate::hash::HashFunction;
+use crate::hash::CheckHash;
 use crate::utils::open_file;
 
 fn create_repeating_string_buffer(length: usize) -> Vec<u8> {
@@ -17,7 +17,7 @@ fn create_repeating_string_buffer(length: usize) -> Vec<u8> {
 	buffer
 }
 
-pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
+pub fn birthday_attack(hash: CheckHash, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let password_list_file_reader = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
@@ -42,8 +42,9 @@ pub fn birthday_attack(hash: HashFunction, password_list_file_path: &str) -> Res
 			let mut current_password = vec!['!' as u8];
 			while !hash(
 				&current_password,
-				salt
-			).eq(&password) {
+				salt,
+				&password
+			) {
 				let last_index = current_password.len() - 1;
 				if current_password[last_index] != '~' as u8 {
 					current_password[last_index] += 1;

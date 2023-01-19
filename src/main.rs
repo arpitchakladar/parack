@@ -16,7 +16,7 @@ use hash::{
 	sha1,
 	sha256,
 	sha512,
-	HashFunction
+	CheckHash
 };
 use algorithms::{
 	targeted_guess,
@@ -33,7 +33,7 @@ fn run_algorithm() -> Result<HashMap<String, String>, &'static str> {
 		macro_rules! get_hash_function {
 			($hash:tt) => {
 				if hash_function.eq_ignore_ascii_case(stringify!($hash)) {
-					Ok($hash as HashFunction)
+					Ok($hash as CheckHash)
 				} else {
 					Err("Hash function not found.")
 				}
@@ -41,7 +41,7 @@ fn run_algorithm() -> Result<HashMap<String, String>, &'static str> {
 
 			($hash:tt, $($remaining_hash:tt),*) => {
 				if hash_function.eq_ignore_ascii_case(stringify!($hash)) {
-					Ok($hash as HashFunction)
+					Ok($hash as CheckHash)
 				} else {
 					get_hash_function!($($remaining_hash),*)
 				}

@@ -6,10 +6,10 @@ use std::collections::HashMap;
 use std::str;
 
 use crate::utils::Resolve;
-use crate::hash::HashFunction;
+use crate::hash::CheckHash;
 use crate::utils::open_file;
 
-pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
+pub fn wordlist_search(hash: CheckHash, wordlist_file_path: &str, password_list_file_path: &str) -> Result<HashMap<String, String>, &'static str> {
 	let password_list_reader = BufReader::new(open_file(
 		password_list_file_path,
 		"Password list file not found.",
@@ -43,8 +43,7 @@ pub fn wordlist_search(hash: HashFunction, wordlist_file_path: &str, password_li
 		if let Ok(checked_password) = line {
 			for (password, salt, uncracked) in &mut password_list {
 				if *uncracked {
-					let hashed_password = hash(checked_password.as_bytes(), salt);
-					if hashed_password.eq(password) {
+					if hash(checked_password.as_bytes(), salt, password) {
 						passwords.insert(
 							hex::encode(password)
 								+ ":"
